@@ -11,7 +11,6 @@ projectsRouter.post("/", (_request, _response) => {
 projectsRouter.get("/:id", (_request, _response) => {
 })
 
-
 projectsRouter.patch("/:id", (_request, _response) => {
 })
 
