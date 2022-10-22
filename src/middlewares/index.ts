@@ -1,3 +1,8 @@
-import * as auth from './auth';
+import { AuthMiddleware } from './AuthMiddleware';
+import { ErrorMiddleware } from './ErrorMiddleware';
 
-export const middleware = { auth };
+export class Middleware {
+  public static auth = AuthMiddleware;
+
+  public static error = ErrorMiddleware;
+}
