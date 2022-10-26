@@ -1,17 +1,28 @@
-import { Router } from "express";
+import { Router } from 'express';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 const projectsRouter = Router();
 
-projectsRouter.get("/", (_request, _response) => {
-})
+projectsRouter.get('/', async (_request, _response) => {
+  try {
+    const projects = await prisma.project.findMany();
 
-projectsRouter.post("/", (_request, _response) => {
-})
+    projects.sort((a, b) => {
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
 
-projectsRouter.get("/:id", (_request, _response) => {
-})
+    _response.send(projects);
+  } catch (err) {
+    _response.status(500).send({ message: 'Ocorreu um erro ao listar projetos' });
+  }
+});
 
-projectsRouter.patch("/:id", (_request, _response) => {
-})
+projectsRouter.post('/', (_request, _response) => {
+});
+
+projectsRouter.get('/:id', (_request, _response) => {});
+
+projectsRouter.patch('/:id', (_request, _response) => {});
 
 export { projectsRouter };
