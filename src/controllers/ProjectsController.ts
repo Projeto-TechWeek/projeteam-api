@@ -139,12 +139,30 @@ export class ProjectController {
 
     if (userProject.tierId > 2) throw new UnauthorizedError('Usuário sem permissão para realizar esta ação');
 
-    const project = await prisma.project.delete({
+    const deleteUserProject = await prisma.user_Project.delete({
+      where: {
+        userId_projectId: { userId, projectId: id },
+      },
+    });
+
+    const deleteRoles = await prisma.role.deleteMany({
+      where: {
+        projectId: id,
+      },
+    });
+
+    const deleteUserOwner = await prisma.user_Project.deleteMany({
+      where: {
+        projectId: id,
+      },
+    });
+
+    const deleteProject = await prisma.project.delete({
       where: {
         id: id,
       },
     });
 
-    res.status(200).json(project);
+    res.status(200).json({ deleteProject, deleteRoles, deleteUserOwner, deleteUserProject });
   };
 }
