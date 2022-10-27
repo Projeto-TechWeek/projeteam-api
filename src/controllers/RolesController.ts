@@ -2,13 +2,33 @@ import type { Role } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import type { Request, Response } from 'express';
 
-import { RoleCreateData } from '../types/rolesTypes';
+import { RoleCreateData, isRoleCreateData } from '../types/rolesTypes';
+import { RequestWithoutParams } from '../types/routesTypes';
 import { BadRequestError } from '../utils/errors/BadRequestError';
 import { UnauthorizedError } from '../utils/errors/UnauthorizedError';
 
 const prisma = new PrismaClient();
 
 export class RolesController {
+  static create = async (req: RequestWithoutParams<Role, RoleCreateData>, res: Response) => {
+    const userId = req.headers.userid as string;
+    if (!userId) throw new BadRequestError('Id de usuário não informado');
+
+    if (!isRoleCreateData(req.body)) throw new BadRequestError('Algumas informações estão faltando');
+    const { name, description, vacancies, projectId } = req.body;
+
+    const role = await prisma.role.create({
+      data: {
+        name: name,
+        description: description,
+        vacancies: vacancies,
+        projectId: projectId,
+      },
+    });
+
+    res.status(201).json(role);
+  };
+
   static delete = async (req: Request<{ id: string }, Role, RoleCreateData>, res: Response) => {
     const { id } = req.params;
     if (!id) throw new BadRequestError('O id do cargo não foi fornecido');
