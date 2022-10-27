@@ -41,8 +41,8 @@ export const isProjectWithRolesCreateData = (
   obj: ExcludeOptionals<ProjectWithRolesCreateData>,
 ): obj is ProjectWithRolesCreateData => {
   const { title, description, area, methodology } = obj;
-  const { id, name, projectId, vacancies } = obj.Role[0];
+  const { name, vacancies } = obj.Role[0];
   const descriptionRole = obj.Role[0].description;
 
-  return areParametersDefined(title, description, area, methodology, id, name, projectId, vacancies, descriptionRole);
+  return areParametersDefined(title, description, area, methodology, name, vacancies, descriptionRole);
 };

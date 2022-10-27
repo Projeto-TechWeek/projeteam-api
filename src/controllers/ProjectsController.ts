@@ -29,40 +29,42 @@ export class ProjectController {
   };
 
   static create = async (req: RequestWithoutParams<Project, ProjectWithRolesCreateData>, res: Response) => {
-    const userId = req.headers.userId as string;
+    const userId = req.headers.userid as string;
     if (!userId) throw new BadRequestError('Id de usuário não informado');
 
     if (!isProjectWithRolesCreateData(req.body)) throw new BadRequestError('Algumas informações estão faltando');
-    const { title, id, methodology, description, createdAt, area, Role } = req.body;
+    const { title, methodology, description, area, Role } = req.body;
 
     const project = await prisma.project.create({
-      data: { title, id, methodology, description, createdAt, area },
+      data: { title, methodology, description, area },
     });
 
-    const roles = Role.map(async (role) => {
-      await prisma.role.create({
-        data: {
-          projectId: id,
-          name: role.name,
-          description: role.description,
-          vacancies: role.vacancies,
-        },
-      });
-    });
+    const roles = await Promise.all(
+      Role.map(async (role) => {
+        return await prisma.role.create({
+          data: {
+            projectId: project.id,
+            name: role.name,
+            description: role.description,
+            vacancies: role.vacancies,
+          },
+        });
+      }),
+    );
 
     const roleOwner = await prisma.role.create({
       data: {
-        projectId: id,
+        projectId: project.id,
         name: 'Organizador',
         description: 'Dono do projeto.',
         vacancies: 1,
       },
     });
 
-    const userOwner = prisma.user_Project.create({
+    const userOwner = await prisma.user_Project.create({
       data: {
         userId: userId,
-        projectId: id,
+        projectId: project.id,
         roleId: roleOwner.id,
         tierId: 1,
       },
@@ -120,5 +122,29 @@ export class ProjectController {
     });
 
     return res.status(200).json(project);
+  };
+
+  static delete = async (req: Request<{ id: string }, Project, ProjectCreateData>, res: Response) => {
+    const { id } = req.params;
+    if (!id) throw new BadRequestError('O id do projeto não foi fornecido');
+
+    const userId = req.headers.userid as string;
+    if (!userId) throw new BadRequestError('Id de usuário não informado');
+
+    const userProject = await prisma.user_Project.findUniqueOrThrow({
+      where: {
+        userId_projectId: { userId, projectId: id },
+      },
+    });
+
+    if (userProject.tierId > 2) throw new UnauthorizedError('Usuário sem permissão para realizar esta ação');
+
+    const project = await prisma.project.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    res.status(200).json(project);
   };
 }
