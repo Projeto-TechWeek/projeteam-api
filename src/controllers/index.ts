@@ -1,5 +1,5 @@
-import { ProjectController } from './projects';
-import { UserController } from './users';
+import { ProjectController } from './ProjectsController';
+import { UserController } from './UsersController';
 
 export const controller = {
   user: UserController,

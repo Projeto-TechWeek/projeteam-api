@@ -66,7 +66,7 @@ export class UserController {
     return res.status(200).json(user);
   };
 
-  static update = async (req: Request<{ id: string }, User, UserProfileData>, res: Response) => {
+  static patch = async (req: Request<{ id: string }, User, UserProfileData>, res: Response) => {
     const { id } = req.params;
     if (!id) throw new BadRequestError('O id do usuário não foi fornecido');
 
