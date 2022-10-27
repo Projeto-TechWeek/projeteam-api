@@ -26,7 +26,7 @@ export class RolesController {
       },
     });
 
-    res.status(201).json(role);
+    return res.status(201).json(role);
   };
 
   static delete = async (req: Request<{ id: string }, Role, RoleCreateData>, res: Response) => {
@@ -56,6 +56,44 @@ export class RolesController {
       },
     });
 
-    res.status(200).json(deleteRole);
+    return res.status(200).json(deleteRole);
+  };
+
+  static patch = async (req: Request<{ id: string }, Role, RoleCreateData>, res: Response) => {
+    const { id } = req.params;
+    if (!id) throw new BadRequestError('O id do projeto não foi fornecido');
+
+    const userId = req.headers.userid as string;
+    if (!userId) throw new BadRequestError('Id de usuário não informado');
+
+    if (!req.body) throw new BadRequestError('Nenhum dado foi informado');
+    const { name, description, vacancies } = req.body;
+
+    const role = await prisma.role.findFirstOrThrow({
+      where: {
+        id: id,
+      },
+    });
+
+    const userProject = await prisma.user_Project.findUniqueOrThrow({
+      where: {
+        userId_projectId: { userId, projectId: role.projectId },
+      },
+    });
+
+    if (userProject.tierId > 2) throw new UnauthorizedError('Usuário sem permissão para realizar esta ação');
+
+    const updateRole = await prisma.role.update({
+      where: {
+        id: id
+      },
+      data:{
+        name,
+        description,
+        vacancies
+      }
+    })
+
+    return res.status(200).json(updateRole)
   };
 }

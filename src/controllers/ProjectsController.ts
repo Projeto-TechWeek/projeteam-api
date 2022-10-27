@@ -163,6 +163,6 @@ export class ProjectController {
       },
     });
 
-    res.status(200).json({ deleteProject, deleteRoles, deleteUserOwner, deleteUserProject });
+    return res.status(200).json({ deleteProject, deleteRoles, deleteUserOwner, deleteUserProject });
   };
 }
