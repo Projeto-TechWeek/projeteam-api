@@ -4,9 +4,8 @@ import express from 'express';
 import './config/firebase';
 import 'express-async-errors';
 
-import { projectsRouter } from './controllers/projects';
-import { usersRouter } from './controllers/users';
-import { Middleware } from './middlewares';
+import { middleware } from './middlewares';
+import { routes } from './routes';
 
 // Setting up Express and others configurations
 dotenv.config();
@@ -15,18 +14,17 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.use(Middleware.auth.verifyToken);
+app.use(middleware.auth.verifyToken);
 
 // Routing
-app.use('/api/users', usersRouter);
-app.use('/api/projects', projectsRouter);
+app.use('/api/users', routes.user);
+app.use('/api/projects', routes.project);
 
 // Global error handling
-app.use(Middleware.error.handle);
+app.use(middleware.error.handle);
 
 // Server start
-const status = process.env.STATUS as string;
-const port = process.env[`${status}_PORT`] as string;
+const port = process.env.PORT as string;
 app.listen(port, () => {
-  console.log(`Server is running in ${status} mode, listening to PORT ${port}`);
+  console.log(`Server is running on PORT ${port}`);
 });

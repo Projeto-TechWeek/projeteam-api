@@ -14,7 +14,7 @@ model User {
   id           String         @id @default(uuid())
   name         String
   email        String
-  avatar       String
+  avatar       String?
   phone        String
   User_Project User_Project[]
 }

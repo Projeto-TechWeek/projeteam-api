@@ -1,7 +1,7 @@
 import { ApiError } from './ApiError';
 
 export class BadRequestError extends ApiError {
-  constructor(message = 'Bad request') {
+  constructor(message = 'Requisição inválida') {
     super(message, 400);
   }
 }
