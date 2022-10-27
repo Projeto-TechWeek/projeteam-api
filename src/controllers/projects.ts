@@ -1,38 +1,29 @@
-import { Router } from 'express';
+import type { Project } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
+import type { Request, Response } from 'express';
 
+import type { ProjectCreateData } from '../types/projectTypes';
+import { isProjectCreateData } from '../types/projectTypes';
 import { BadRequestError } from '../utils/errors/BadRequestError';
-import { ApiError } from '../utils/errors/ApiError';
+
 const prisma = new PrismaClient();
 
-const projectsRouter = Router();
+export class ProjectController {
+  static readAll = async (_req: Request, res: Response) => {
+    const projects = await prisma.project.findMany();
 
-projectsRouter.get('/', async (_request, response) => {
-  const projects = await prisma.project.findMany();
+    projects.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-  projects.sort((a, b) => {
-    return b.createdAt.getTime() - a.createdAt.getTime();
-  });
+    res.status(200).send(projects);
+  };
 
-  response.status(200).send(projects);
-});
+  static create = async (req: Request<{ id: string }, Project, ProjectCreateData>, res: Response) => {
+    if (!isProjectCreateData(req.body)) throw new BadRequestError('Algumas informações estão faltando');
 
-projectsRouter.post('/', async (request, response) => {
-  const { title, description, methodology, area } = request.body;
+    const project = await prisma.project.create({
+      data: req.body,
+    });
 
-  if (!title || !description || !methodology || !area) {
-    throw new BadRequestError('É preciso preencher todos os campos');
-  }
-  try {
-    const project = await prisma.project.create({ data: { title, description, methodology, area } });
-    response.status(201).send(project);
-  } catch (err) {
-    throw new ApiError('Ocorreu um erro ao criar o projeto');
-  }
-});
-
-projectsRouter.get('/:id', (_request, _response) => {});
-
-projectsRouter.patch('/:id', (_request, _response) => {});
-
-export { projectsRouter };
+    res.status(201).json(project);
+  };
+}

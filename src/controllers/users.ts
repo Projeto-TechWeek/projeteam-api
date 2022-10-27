@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 
 export class UserController {
   static create = async (req: RequestWithoutParams<User, UserCreateData>, res: Response) => {
-    if (!isUserCreateData(req.body)) throw new BadRequestError('Algumas informações estão faltando!');
+    if (!isUserCreateData(req.body)) throw new BadRequestError('Algumas informações estão faltando');
 
     const { id, name, email, phone, avatar } = req.body;
 
