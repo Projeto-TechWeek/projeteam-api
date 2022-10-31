@@ -78,6 +78,15 @@ export class ProjectController {
 
     if (!id) throw new BadRequestError('O id do projeto não foi fornecido');
 
+    const searchProjectOwner = await prisma.project.findUniqueOrThrow({
+      select: {
+        User_Project: true,
+      },
+      where: {
+        id: id,
+      },
+    });
+
     const project = await prisma.project.findUniqueOrThrow({
       include: {
         Role: true,
@@ -88,7 +97,16 @@ export class ProjectController {
       },
     });
 
-    return res.status(200).json(project);
+    const contactProject = await prisma.user.findUniqueOrThrow({
+      select: {
+        phone: true,
+      },
+      where: {
+        id: searchProjectOwner.User_Project[0].userId,
+      },
+    });
+
+    return res.status(200).json({ project, contactProject });
   };
 
   static patch = async (req: Request<{ id: string }, Project, ProjectCreateData>, res: Response) => {
